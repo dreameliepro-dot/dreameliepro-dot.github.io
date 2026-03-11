@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Roue de films</title>
+<title>Movie wheel</title>
 
 <style>
 
@@ -71,9 +71,9 @@ font-weight:bold;
 
 <body>
 
-<h1>🎬 Roue de films</h1>
+<h1>🎬 MOVIE WHEEL </h1>
 
-<p>Un film par ligne :</p>
+<p>Type a movie/line:</p>
 
 <textarea id="films"></textarea>
 
@@ -91,67 +91,10 @@ font-weight:bold;
 
 <script>
 
-const DEFAULT_LIST = `Fragtime
-The Summer
-Her Kiss My Libido
-Good Boy
-La Belle de Gaza
-Shiva Baby
-Leon
-The World for the Two of Us
-Jone
-Pariah
-Perfect Blue
-Shades of the Heart
-Stone Cold Fox
-What Jennifer Did
-Resident Evil
-Debs
-Respire
-Uptown Girls
-I Wish You All the Best
-Les Filles du Botaniste
-All Shall Be Well
-Drift
-My Ex Wedding
-Paradise Hill
-Happy Together
-Des Preuves d'Amour
-Three Identical Strangers
-Pokemon
-Patéma
-The Queen of My Dreams
-Take Me Home
-We Everyday
-Mayday
-Yes or No
-Silver Star
-Silver Haze
-Forever
-Love Lies Bleeding
-Polarized
-The Adventures of Priscilla
-Fitting In
-Swing Girls
-Daughters
-Un Fantasma en la Batalla
-Microhabitat
-Murmur of Youth
-One Wedding and a Funeral
-Only the River Flows
-La Petite Dernière
-Concerning My Daughter
-Liljia Forever
-28 Days Later
-The Sun
-Frankenstein
-Breathe
-Exhuma
-Phantom
-Redlife
-Montréal ma Belle
-Blue
-La Frappe`;
+const DEFAULT_LIST = `Movie 1
+Movie 2 
+Movie 3
+Movie 4`;
 
 let films = [];
 let startAngle = 0;
@@ -298,7 +241,7 @@ let index = Math.floor(pointerAngle / arc) % films.length;
 
 let winner = films[index];
 
-document.getElementById("result").textContent = "Film choisi : " + winner;
+document.getElementById("result").textContent = "Movie selected : " + winner;
 
 spinning=false;
 
