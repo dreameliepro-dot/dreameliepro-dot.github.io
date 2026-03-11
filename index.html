@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Roue de films</title>
+
+<style>
+
+body{
+font-family:Arial,Helvetica,sans-serif;
+background:#111;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:20px;
+padding:20px;
+}
+
+textarea{
+width:320px;
+height:150px;
+padding:10px;
+border-radius:8px;
+}
+
+button{
+padding:10px 16px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:16px;
+}
+
+#wheelContainer{
+position:relative;
+width:400px;
+height:400px;
+}
+
+canvas{
+background:#222;
+border-radius:50%;
+}
+
+#pointer{
+position:absolute;
+left:50%;
+top:-2px;
+transform:translateX(-50%);
+width:0;
+height:0;
+border-left:14px solid transparent;
+border-right:14px solid transparent;
+border-top:26px solid white;
+z-index:10;
+}
+
+#counter{
+font-size:14px;
+opacity:0.8;
+}
+
+#result{
+font-size:22px;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🎬 Roue de films</h1>
+
+<p>Un film par ligne :</p>
+
+<textarea id="films"></textarea>
+
+<div id="counter"></div>
+
+<button onclick="buildWheel()">Créer la roue</button>
+<button onclick="spin()">Tourner la roue</button>
+
+<div id="wheelContainer">
+<div id="pointer"></div>
+<canvas id="wheel" width="400" height="400"></canvas>
+</div>
+
+<div id="result"></div>
+
+<script>
+
+const DEFAULT_LIST = `Fragtime
+The Summer
+Her Kiss My Libido
+Good Boy
+La Belle de Gaza
+Shiva Baby
+Leon
+The World for the Two of Us
+Jone
+Pariah
+Perfect Blue
+Shades of the Heart
+Stone Cold Fox
+What Jennifer Did
+Resident Evil
+Debs
+Respire
+Uptown Girls
+I Wish You All the Best
+Les Filles du Botaniste
+All Shall Be Well
+Drift
+My Ex Wedding
+Paradise Hill
+Happy Together
+Des Preuves d'Amour
+Three Identical Strangers
+Pokemon
+Patéma
+The Queen of My Dreams
+Take Me Home
+We Everyday
+Mayday
+Yes or No
+Silver Star
+Silver Haze
+Forever
+Love Lies Bleeding
+Polarized
+The Adventures of Priscilla
+Fitting In
+Swing Girls
+Daughters
+Un Fantasma en la Batalla
+Microhabitat
+Murmur of Youth
+One Wedding and a Funeral
+Only the River Flows
+La Petite Dernière
+Concerning My Daughter
+Liljia Forever
+28 Days Later
+The Sun
+Frankenstein
+Breathe
+Exhuma
+Phantom
+Redlife
+Montréal ma Belle
+Blue
+La Frappe`;
+
+let films = [];
+let startAngle = 0;
+let spinning = false;
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const textarea = document.getElementById("films");
+const counter = document.getElementById("counter");
+
+function saveFilms(){
+localStorage.setItem("movieWheelList", textarea.value);
+}
+
+function loadFilms(){
+
+let saved = localStorage.getItem("movieWheelList");
+
+if(saved){
+textarea.value = saved;
+}
+else{
+textarea.value = DEFAULT_LIST;
+}
+
+}
+
+function updateCounter(){
+
+let list = textarea.value
+.split("\n")
+.map(f=>f.trim())
+.filter(Boolean);
+
+counter.textContent = "Films dans la liste : " + list.length;
+
+}
+
+textarea.addEventListener("input", ()=>{
+
+updateCounter();
+saveFilms();
+
+});
+
+function buildWheel(){
+
+films = textarea.value
+.split("\n")
+.map(f=>f.trim())
+.filter(Boolean);
+
+saveFilms();
+updateCounter();
+drawWheel();
+
+}
+
+function drawWheel(){
+
+if(films.length===0) return;
+
+const arc = (Math.PI*2)/films.length;
+
+ctx.clearRect(0,0,400,400);
+
+films.forEach((film,i)=>{
+
+const angle = startAngle + i*arc;
+
+ctx.beginPath();
+ctx.moveTo(200,200);
+ctx.arc(200,200,200,angle,angle+arc);
+
+ctx.fillStyle = `hsl(${i*360/films.length},70%,50%)`;
+ctx.fill();
+
+ctx.save();
+
+ctx.translate(200,200);
+ctx.rotate(angle + arc/2);
+
+ctx.fillStyle="white";
+ctx.font="14px sans-serif";
+ctx.textAlign="right";
+
+ctx.fillText(film,180,5);
+
+ctx.restore();
+
+});
+
+}
+
+function spin(){
+
+if(spinning || films.length===0) return;
+
+spinning=true;
+
+let spinAngle = Math.random()*3000 + 2000;
+let duration = 4000;
+let start = null;
+
+function animate(t){
+
+if(!start) start=t;
+
+let progress = t-start;
+
+let ease = 1-Math.pow(1-progress/duration,3);
+
+let angle = (spinAngle*ease)*Math.PI/180;
+
+startAngle = angle;
+
+drawWheel();
+
+if(progress<duration){
+
+requestAnimationFrame(animate);
+
+}else{
+
+finish();
+
+}
+
+}
+
+requestAnimationFrame(animate);
+
+}
+
+function finish(){
+
+const arc=(Math.PI*2)/films.length;
+
+let pointerAngle = (3*Math.PI/2 - startAngle) % (Math.PI*2);
+
+if(pointerAngle < 0) pointerAngle += Math.PI*2;
+
+let index = Math.floor(pointerAngle / arc) % films.length;
+
+let winner = films[index];
+
+document.getElementById("result").textContent = "Film choisi : " + winner;
+
+spinning=false;
+
+}
+
+loadFilms();
+updateCounter();
+buildWheel();
+
+</script>
+
+</body>
+</html>
