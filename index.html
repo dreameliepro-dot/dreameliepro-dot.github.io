@@ -1,257 +1,523 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Movie wheel</title>
+<title>The Movie Wheel</title>
 
 <style>
-
 body{
-font-family:Arial,Helvetica,sans-serif;
-background:#111;
-color:white;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:20px;
-padding:20px;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#111;
+    color:white;
+    margin:0;
+    padding:40px;
 }
 
+#layout{
+    display:flex;
+    justify-content:center;
+    gap:60px;
+    max-width:1200px;
+    margin:auto;
+}
+
+/* colonnes */
+.panel{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* gauche */
+#leftPanel{
+    width:320px;
+}
+
+/* centre */
+#centerPanel{
+    align-items:center;
+    text-align:center;
+}
+
+/* droite */
+#rightPanel{
+    width:420px;
+    position:relative;
+}
+
+/* textarea */
 textarea{
-width:320px;
-height:150px;
-padding:10px;
-border-radius:8px;
+    width:100%;
+    height:300px;
+    padding:10px;
+    border-radius:8px;
 }
 
+/* boutons */
 button{
-padding:10px 16px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-size:16px;
+    padding:10px 16px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
 }
 
+/* roue */
 #wheelContainer{
-position:relative;
-width:400px;
-height:400px;
+    position:relative;
+    width:400px;
+    height:400px;
+    margin:auto;
 }
 
 canvas{
-background:#222;
-border-radius:50%;
+    background:#222;
+    border-radius:50%;
 }
 
 #pointer{
-position:absolute;
-left:50%;
-top:-2px;
-transform:translateX(-50%);
-width:0;
-height:0;
-border-left:14px solid transparent;
-border-right:14px solid transparent;
-border-top:26px solid white;
-z-index:10;
+    position:absolute;
+    left:50%;
+    top:-2px;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:14px solid transparent;
+    border-right:14px solid transparent;
+    border-top:26px solid white;
+    z-index:10;
+}
+
+/* résultat */
+#result{
+    font-size:22px;
+    font-weight:bold;
+    text-align:center;
+}
+
+/* widget film */
+#movieCard{
+    display:flex;
+    align-items:flex-start;
+    gap:20px;
+    background:#1c1c1c;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.5);
+    opacity:0;
+    transform:translateY(20px);
+    transition:all 0.6s ease;
+    max-width:420px;
+    position:relative;
+}
+
+#movieCard img{
+    width:140px;
+    height:auto;
+    flex-shrink:0;
+    border-radius:8px;
+}
+
+#movieCard div{
+    flex:1;
+}
+
+#movieCard.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.hidden{
+    display:none;
 }
 
 #counter{
-font-size:14px;
-opacity:0.8;
+    font-size:14px;
+    opacity:0.8;
 }
 
-#result{
-font-size:22px;
-font-weight:bold;
+/* language toggle */
+#langToggle{
+    position:absolute;
+    top:10px;
+    right:10px;
+    cursor:pointer;
+    font-size:16px;
+    padding:4px 8px;
+    border-radius:6px;
+    background:#333;
+    color:white;
+    border:none;
+    transition:all 0.2s ease;
+}
+#langToggle:hover{
+    transform:scale(1.1);
 }
 
+#centerPanel h1{
+    margin-bottom:20px;
+}
+
+/* availability card */
+#availabilityCard{
+    background:#1c1c1c;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.5);
+    margin-top:15px;
+    opacity:0;
+    transform:translateY(20px);
+    transition:all 0.6s ease;
+    max-width:420px;
+}
+
+#availabilityCard.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+#availabilityCard ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+#availabilityCard li{
+    margin-bottom:5px;
+}
+
+/* review card */
+#reviewCard{
+    background:#1c1c1c;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.5);
+    margin-top:15px;
+    opacity:0;
+    transform:translateY(20px);
+    transition:all 0.6s ease;
+    max-width:420px;
+}
+
+#reviewCard.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+#reviewCard ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+#reviewCard li{
+    margin-bottom:10px;
+    font-size:14px;
+}
+
+#reviewCard button{
+    margin-top:10px;
+    padding:8px 12px;
+    background:#1E90FF;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+#reviewCard button:hover{
+    background:#1C86EE;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎬 MOVIE WHEEL </h1>
+<div id="layout">
 
-<p>Type a movie/line:</p>
-
+<!-- LEFT PANEL -->
+<div id="leftPanel" class="panel">
+<p>Add a movie per line:</p>
 <textarea id="films"></textarea>
-
-<div id="counter"></div>
-
+<div id="counter">Number of movies in your watchlist: 0</div>
 <button onclick="buildWheel()">Generate wheel</button>
-<button onclick="spin()">Turn wheel</button>
+</div>
 
+<!-- CENTER PANEL -->
+<div id="centerPanel" class="panel">
+<h1>The Movie Wheel</h1>
 <div id="wheelContainer">
 <div id="pointer"></div>
 <canvas id="wheel" width="400" height="400"></canvas>
 </div>
+<button onclick="spin()">Spin the wheel!</button>
+<div id="result">Movie to watch: </div>
+</div>
 
-<div id="result"></div>
+<!-- RIGHT PANEL -->
+<div id="rightPanel" class="panel">
+
+<!-- Movie Card -->
+<div id="movieCard" class="hidden">
+    <button id="langToggle">FR</button>
+    <img id="poster">
+    <div>
+        <h2 id="title"></h2>
+        <p id="synopsis"></p>
+    </div>
+</div>
+
+<!-- Availability Card -->
+<div id="availabilityCard" class="hidden">
+    <h3>Available on:</h3>
+    <ul id="platforms"></ul>
+</div>
+
+<!-- Review Card -->
+<div id="reviewCard" class="hidden">
+    <h3>User Reviews:</h3>
+    <ul id="reviewsList"></ul>
+    <button id="letterboxdBtn" onclick="openLetterboxd()">See more on Letterboxd</button>
+</div>
+
+</div>
+</div>
 
 <script>
-
-const DEFAULT_LIST = `Movie 1
-Movie 2 
-Movie 3
-Movie 4`;
+const DEFAULT_LIST = `Fragtime
+The Summer
+Her Kiss My Libido
+Good Boy
+La Belle de Gaza
+Shiva Baby
+Leon
+The World for the Two of Us
+Jone
+Pariah
+Perfect Blue
+Shades of the Heart
+Stone Cold Fox
+What Jennifer Did
+Resident Evil
+Debs
+Respire
+Uptown Girls
+I Wish You All the Best
+Les Filles du Botaniste
+All Shall Be Well
+Drift
+My Ex Wedding
+Paradise Hill
+Happy Together
+Des Preuves d'Amour
+Three Identical Strangers
+Pokemon
+Patéma
+The Queen of My Dreams
+Take Me Home
+We Everyday
+Mayday
+Yes or No
+Silver Star
+Silver Haze
+Forever
+Love Lies Bleeding
+Polarized
+The Adventures of Priscilla
+Fitting In
+Swing Girls
+Daughters
+Un Fantasma en la Batalla
+Microhabitat
+Murmur of Youth
+One Wedding and a Funeral
+Only the River Flows
+La Petite Dernière
+Concerning My Daughter
+Liljia Forever
+28 Days Later
+The Sun
+Frankenstein
+Breathe
+Exhuma
+Phantom
+Redlife
+Montréal ma Belle
+Blue
+La Frappe`;
 
 let films = [];
 let startAngle = 0;
 let spinning = false;
+let currentLang = "en";
+let currentMovieTitle = "";
+let currentLetterboxdSlug = "";
 
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 const textarea = document.getElementById("films");
 const counter = document.getElementById("counter");
+const langToggle = document.getElementById("langToggle");
+const letterboxdBtn = document.getElementById("letterboxdBtn");
 
-function saveFilms(){
-localStorage.setItem("movieWheelList", textarea.value);
-}
-
-function loadFilms(){
-
-let saved = localStorage.getItem("movieWheelList");
-
-if(saved){
-textarea.value = saved;
-}
-else{
-textarea.value = DEFAULT_LIST;
-}
-
-}
-
-function updateCounter(){
-
-let list = textarea.value
-.split("\n")
-.map(f=>f.trim())
-.filter(Boolean);
-
-counter.textContent = "number of movies : " + list.length;
-
-}
-
-textarea.addEventListener("input", ()=>{
-
-updateCounter();
-saveFilms();
-
-});
-
-function buildWheel(){
-
-films = textarea.value
-.split("\n")
-.map(f=>f.trim())
-.filter(Boolean);
-
-saveFilms();
-updateCounter();
-drawWheel();
-
-}
-
+function saveFilms(){ localStorage.setItem("movieWheelList", textarea.value);}
+function loadFilms(){ let saved = localStorage.getItem("movieWheelList"); textarea.value = saved ? saved : DEFAULT_LIST; }
+function updateCounter(){ let list = textarea.value.split("\n").map(f=>f.trim()).filter(Boolean); counter.textContent = "Number of movies in your watchlist: " + list.length; }
+textarea.addEventListener("input", ()=>{ updateCounter(); saveFilms(); });
+function buildWheel(){ films = textarea.value.split("\n").map(f=>f.trim()).filter(Boolean); saveFilms(); updateCounter(); drawWheel(); }
 function drawWheel(){
-
-if(films.length===0) return;
-
-const arc = (Math.PI*2)/films.length;
-
-ctx.clearRect(0,0,400,400);
-
-films.forEach((film,i)=>{
-
-const angle = startAngle + i*arc;
-
-ctx.beginPath();
-ctx.moveTo(200,200);
-ctx.arc(200,200,200,angle,angle+arc);
-
-ctx.fillStyle = `hsl(${i*360/films.length},70%,50%)`;
-ctx.fill();
-
-ctx.save();
-
-ctx.translate(200,200);
-ctx.rotate(angle + arc/2);
-
-ctx.fillStyle="white";
-ctx.font="14px sans-serif";
-ctx.textAlign="right";
-
-ctx.fillText(film,180,5);
-
-ctx.restore();
-
-});
-
+    if(films.length===0) return;
+    const arc = (Math.PI*2)/films.length;
+    ctx.clearRect(0,0,400,400);
+    films.forEach((film,i)=>{
+        const angle = startAngle + i*arc;
+        ctx.beginPath();
+        ctx.moveTo(200,200);
+        ctx.arc(200,200,200,angle,angle+arc);
+        ctx.fillStyle = `hsl(${i*360/films.length},70%,50%)`;
+        ctx.fill();
+        ctx.save();
+        ctx.translate(200,200);
+        ctx.rotate(angle + arc/2);
+        ctx.fillStyle="white";
+        ctx.font="14px sans-serif";
+        ctx.textAlign="right";
+        ctx.fillText(film,180,5);
+        ctx.restore();
+    });
 }
-
 function spin(){
-
-if(spinning || films.length===0) return;
-
-spinning=true;
-
-let spinAngle = Math.random()*3000 + 2000;
-let duration = 4000;
-let start = null;
-
-function animate(t){
-
-if(!start) start=t;
-
-let progress = t-start;
-
-let ease = 1-Math.pow(1-progress/duration,3);
-
-let angle = (spinAngle*ease)*Math.PI/180;
-
-startAngle = angle;
-
-drawWheel();
-
-if(progress<duration){
-
-requestAnimationFrame(animate);
-
-}else{
-
-finish();
-
+    if(spinning || films.length===0) return;
+    spinning=true;
+    document.getElementById("movieCard").classList.add("hidden");
+    document.getElementById("movieCard").classList.remove("show");
+    document.getElementById("availabilityCard").classList.add("hidden");
+    document.getElementById("availabilityCard").classList.remove("show");
+    document.getElementById("reviewCard").classList.add("hidden");
+    document.getElementById("reviewCard").classList.remove("show");
+    let spinAngle = Math.random()*3000 + 2000;
+    let duration = 4000;
+    let start = null;
+    function animate(t){
+        if(!start) start=t;
+        let progress = t-start;
+        let ease = 1-Math.pow(1-progress/duration,3);
+        let angle = (spinAngle*ease)*Math.PI/180;
+        startAngle = angle;
+        drawWheel();
+        if(progress<duration) requestAnimationFrame(animate);
+        else finish();
+    }
+    requestAnimationFrame(animate);
 }
-
-}
-
-requestAnimationFrame(animate);
-
-}
-
 function finish(){
-
-const arc=(Math.PI*2)/films.length;
-
-let pointerAngle = (3*Math.PI/2 - startAngle) % (Math.PI*2);
-
-if(pointerAngle < 0) pointerAngle += Math.PI*2;
-
-let index = Math.floor(pointerAngle / arc) % films.length;
-
-let winner = films[index];
-
-document.getElementById("result").textContent = "Movie selected : " + winner;
-
-spinning=false;
-
+    const arc=(Math.PI*2)/films.length;
+    let pointerAngle = (3*Math.PI/2 - startAngle) % (Math.PI*2);
+    if(pointerAngle < 0) pointerAngle += Math.PI*2;
+    let index = Math.floor(pointerAngle / arc) % films.length;
+    let winner = films[index];
+    document.getElementById("result").textContent = "Movie to watch: " + winner;
+    currentMovieTitle = winner;
+    loadMovieData(currentMovieTitle, currentLang);
+    spinning=false;
 }
+
+const API_KEY = "fb52892bc15e0fc5bc9a459915797b00";
+
+async function loadWatchProviders(movieId, country="FR"){
+    try{
+        const url = `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const providers = data.results[country]?.flatrate || [];
+        return providers.map(p => p.provider_name);
+    } catch(e){
+        console.error("Error fetching watch providers:", e);
+        return [];
+    }
+}
+
+async function loadReviews(movieId, letterboxdSlug){
+    try{
+        const url = `https://api.themoviedb.org/3/movie/${movieId}/reviews?api_key=${API_KEY}&language=${currentLang}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const list = document.getElementById("reviewsList");
+        list.innerHTML = "";
+
+        const reviews = data.results.slice(0,2);
+        if(reviews.length === 0){
+            list.innerHTML = "<li>No reviews available.</li>";
+        } else {
+            reviews.forEach(r=>{
+                const li = document.createElement("li");
+                li.textContent = `"${r.content.substring(0,200)}..."`;
+                list.appendChild(li);
+            });
+        }
+
+        currentLetterboxdSlug = letterboxdSlug;
+        const card = document.getElementById("reviewCard");
+        card.classList.remove("hidden");
+        setTimeout(()=>{card.classList.add("show");},50);
+    } catch(e){
+        console.error(e);
+    }
+}
+
+function openLetterboxd(){
+    if(currentLetterboxdSlug){
+        window.open(`https://letterboxd.com/film/${currentLetterboxdSlug}/`, "_blank");
+    }
+}
+
+async function loadMovieData(title, lang){
+    const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(title)}&language=${lang}`;
+    try{
+        const res = await fetch(searchUrl);
+        const data = await res.json();
+        if(data.results.length > 0){
+            const movie = data.results[0];
+            const poster = movie.poster_path ? "https://image.tmdb.org/t/p/w500" + movie.poster_path : "";
+            document.getElementById("title").textContent = movie.title + " (" + (movie.release_date ? movie.release_date.slice(0,4) : "") + ")";
+            document.getElementById("synopsis").textContent = movie.overview || "Synopsis not available.";
+            document.getElementById("poster").src = poster;
+
+            const card = document.getElementById("movieCard");
+            card.classList.remove("hidden");
+            setTimeout(()=>{card.classList.add("show");},50);
+
+            const platforms = await loadWatchProviders(movie.id);
+            showAvailability(platforms.length>0 ? platforms : ["No legal streaming available"]);
+
+            const slug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+            loadReviews(movie.id, slug);
+        }
+    } catch(e){ console.error(e);}
+}
+
+function showAvailability(platforms){
+    const card = document.getElementById("availabilityCard");
+    const list = document.getElementById("platforms");
+    list.innerHTML = "";
+    platforms.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = p;
+        list.appendChild(li);
+    });
+    card.classList.remove("hidden");
+    setTimeout(()=>{ card.classList.add("show");},50);
+}
+
+langToggle.addEventListener("click", ()=>{
+    if(currentLang==="en"){ currentLang="fr"; langToggle.textContent="ENG"; }
+    else{ currentLang="en"; langToggle.textContent="FR"; }
+    loadMovieData(currentMovieTitle, currentLang);
+});
 
 loadFilms();
 updateCounter();
 buildWheel();
-
 </script>
-
 </body>
 </html>
